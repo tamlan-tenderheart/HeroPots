@@ -73,8 +73,8 @@ F1::
     IsRunning := !IsRunning
     If(IsRunning) {
         InputBox, Count, Hero Potion Crafter, How many hero potions to craft?,,,,,,,,1
+        TrayTip,Hero Pot Crafter,Crafting is started,,1
         While(Count > 0 AND IsRunning) {
-            TrayTip,Hero Pot Crafter,Crafting is started,,1
             if(IsRunning) BuyOne(StrengthDraughtKey)
             if(IsRunning) MakeOne(StrengthDraughtKey,36000)       ; 25s in my testing, using 36s    
             if(IsRunning) BuyOne(FortitudeDraughtKey)
