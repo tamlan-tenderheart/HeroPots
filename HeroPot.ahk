@@ -51,8 +51,8 @@ MightDraughtKey         := "5"
 DeftnessDraughtKey      := "6"
 HeroPotKey              := "7"
 
-Count := 1         ; the number of hero pots to make (default is one)
-IsRunning := false ; flag to check for early script termination
+global Count := 1         ; the number of hero pots to make (default is one)
+global IsRunning := false ; flag to check for early script termination
 
 BuyOne(PotionKey) {
     ControlSend,,{blind}%PotionKey%,ahk_exe game.dll
@@ -76,6 +76,7 @@ BuyAndMake(PotionKey, Count, Delay) {
         MakeOne(PotionKey, Delay)
         Count := Count - 1
     }
+    return
 }
 
 F1::
