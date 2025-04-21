@@ -64,33 +64,38 @@ BuyOne(PotionKey) {
     return
 }
 
-MakeOne(PotionKey, delay) {
+MakeOne(PotionKey, Delay) {
     ControlSend,,{blind}%PotionKey%,ahk_exe game.dll
-    Sleep,delay
+    Sleep,Delay
     return
 }
+
+BuyAndMake(PotionKey, Count, Delay) {
+    while(Count > 0 AND IsRunning) {
+        BuyOne(PotionKey)
+        MakeOne(PotionKey, Delay)
+        Count := Count - 1
+    }
+}
+
 F1::
     IsRunning := !IsRunning
     If(IsRunning) {
         InputBox, Count, Hero Potion Crafter, How many hero potions to craft?,,,,,,,,1
-        TrayTip,Hero Pot Crafter,Crafting is started,,1
-        While(Count > 0 AND IsRunning) {
-            if(IsRunning) BuyOne(StrengthDraughtKey)
-            if(IsRunning) MakeOne(StrengthDraughtKey,36000)       ; 25s in my testing, using 36s    
-            if(IsRunning) BuyOne(FortitudeDraughtKey)
-            if(IsRunning) MakeOne(FortitudeDraughtKey, 36000)     ; 25s in my testing, using 36s 
-            if(IsRunning) BuyOne(DexterityDraughtKey)
-            if(IsRunning) MakeOne(DexterityDraughtKey, 36000)     ; 25s in my testing, using 36s 
-            if(IsRunning) BuyOne(EnlightenmentDraughtKey)
-            if(IsRunning) MakeOne(EnlightenmentDraughtKey, 36000) ; 25s in my testing, using 36s 
-            if(IsRunning) BuyOne(MightDraughtKey)
-            if(IsRunning) MakeOne(MightDraughtKey, 42000)         ; 28s in my testing, using 42s
-            if(IsRunning) BuyOne(DeftnessDraughtKey)
-            if(IsRunning) MakeOne(DeftnessDraughtKey, 42000)      ; 28s in my testing, using 42s
-            if(IsRunning) MakeOne(HeroPotKey, 10000)              ; 5s in my testing, using 10s
-            Count := Count - 1    
+        if(!ErrorLevel) {
+            TrayTip,Hero Pot Crafter,Crafting is started,,1
+            While(Count > 0 AND IsRunning) {
+                BuyAndMake(StrengthDraughtKey, 3, 36000)      ; 25s in my testing, using 36s    
+                BuyAndMake(FortitudeDraughtKey, 3, 36000)     ; 25s in my testing, using 36s 
+                BuyAndMake(DexterityDraughtKey, 3, 36000)     ; 25s in my testing, using 36s 
+                BuyAndMake(EnlightenmentDraughtKey, 3, 36000) ; 25s in my testing, using 36s 
+                BuyAndMake(MightDraughtKey, 3, 42000)         ; 28s in my testing, using 42s
+                BuyAndMake(DeftnessDraughtKey, 3, 42000)      ; 28s in my testing, using 42s
+                if(IsRunning) MakeOne(HeroPotKey, 10000)      ; 5s in my testing, using 10s
+                Count := Count - 1    
+            }
+            TrayTip,Hero Pot Crafter,Crafting is complete,,1
         }
-        TrayTip,Hero Pot Crafter,Crafting is complete,,1
         IsRunning := false
     }
     return
