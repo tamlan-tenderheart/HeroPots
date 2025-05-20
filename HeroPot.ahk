@@ -4,8 +4,13 @@
 ;
 ; Requirements:
 ; The script requires that you have the Superior Draughts and Hero Pots on your current #1 quickbar at the time of use.
-; Superior Strength Draught should be on the "1" button, Fortitude on the "2" button, Dexterity on the "3" button, 
-; enlightenment on the "4" button, might on "5", deftness on "6", and the hero pot itself on "7".
+; * Superior Strength Draught should be on the "1" button
+; * Fortitude Draught on the "2" button, 
+; * Dexterity Draught on the "3" button, 
+; * Enlightenment Draught on the "4" button,
+; * Might Draught on "5", 
+; * Deftness Draught on "6", 
+; * and the Hero pot itself on "7".
 ; You can change this by changing the constants in the code.
 ;
 ; Usage: 
@@ -31,7 +36,7 @@
 ; You have been warned.
 
 #UseHook
-#IfWinActive, ahk_exe game.dll
+#IfWinActive, ahk_exe eden.dll
 #SingleInstance, force
 #MaxThreadsPerHotkey 2
 #MaxHotKeysPerInterval 200
@@ -42,7 +47,7 @@ SetBatchLines, -1
 SetWorkingDir, %A_ScriptDir%
 SetKeyDelay,,100
 
-; Constants
+; Toolbar Constants
 StrengthDraughtKey      := "1"
 FortitudeDraughtKey     := "2"
 DexterityDraughtKey     := "3"
@@ -54,28 +59,29 @@ HeroPotKey              := "7"
 global Count := 1         ; the number of hero pots to make (default is one)
 global IsRunning := false ; flag to check for early script termination
 
-BuyOne(PotionKey) {
-    ControlSend,,{blind}%PotionKey%,ahk_exe game.dll
+Buy(PotionKey, Count) {
+    ControlSend,,{blind}%PotionKey%,ahk_exe eden.dll
     Sleep,500
-    ControlSend,,{Blind}/,ahk_exe game.dll
+    ControlSend,,{Blind}/,ahk_exe eden.dll
     Sleep,50
-    ControlSend,,{Blind}craftqueue buy 1`n,ahk_exe game.dll
+    ControlSend,,{Blind}craftqueue buy upto %Count%`n,ahk_exe eden.dll
     Sleep,500
-    return
 }
 
-MakeOne(PotionKey, Delay) {
-    ControlSend,,{blind}%PotionKey%,ahk_exe game.dll
+Make(PotionKey, Delay) {
+    ControlSend,,{blind}%PotionKey%,ahk_exe eden.dll
     Sleep,Delay
     return
 }
 
 BuyAndMake(PotionKey, Count, Delay) {
+    Buy(PotionKey, Count)
     while(Count > 0 AND IsRunning) {
-        BuyOne(PotionKey)
-        MakeOne(PotionKey, Delay)
+        Make(PotionKey, Delay)
         Count := Count - 1
     }
+    if(!IsRunning)
+        throw "terminated"
     return
 }
 
@@ -85,16 +91,19 @@ F1::
         InputBox, Count, Hero Potion Crafter, How many hero potions to craft?,,,,,,,,1
         if(!ErrorLevel) {
             TrayTip,Hero Pot Crafter,Crafting is started,,1
-            While(Count > 0 AND IsRunning) {
-                BuyAndMake(StrengthDraughtKey, 3, 36000)      ; 25s in my testing, using 36s    
-                BuyAndMake(FortitudeDraughtKey, 3, 36000)     ; 25s in my testing, using 36s 
-                BuyAndMake(DexterityDraughtKey, 3, 36000)     ; 25s in my testing, using 36s 
-                BuyAndMake(EnlightenmentDraughtKey, 3, 36000) ; 25s in my testing, using 36s 
-                BuyAndMake(MightDraughtKey, 3, 42000)         ; 28s in my testing, using 42s
-                BuyAndMake(DeftnessDraughtKey, 3, 42000)      ; 28s in my testing, using 42s
-                if(IsRunning) MakeOne(HeroPotKey, 10000)      ; 5s in my testing, using 10s
-                Count := Count - 1    
+            try {
+                While(Count > 0 AND IsRunning) {
+                    BuyAndMake(StrengthDraughtKey, 3, 36000)      ; 25s in my testing, using 36s    
+                    BuyAndMake(FortitudeDraughtKey, 3, 36000)     ; 25s in my testing, using 36s 
+                    BuyAndMake(DexterityDraughtKey, 3, 36000)     ; 25s in my testing, using 36s 
+                    BuyAndMake(EnlightenmentDraughtKey, 3, 36000) ; 25s in my testing, using 36s 
+                    BuyAndMake(MightDraughtKey, 3, 42000)         ; 28s in my testing, using 42s
+                    BuyAndMake(DeftnessDraughtKey, 3, 42000)      ; 28s in my testing, using 42s
+                    Make(HeroPotKey, 10000)                       ; 5s in my testing, using 10s
+                    Count := Count - 1    
+                }
             }
+            catch { }
             TrayTip,Hero Pot Crafter,Crafting is complete,,1
         }
         IsRunning := false
